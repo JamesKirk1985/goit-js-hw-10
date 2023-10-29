@@ -1,22 +1,28 @@
-// console.log('Hello World!');
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
+
+import { Report } from 'notiflix/build/notiflix-report-aio';
 
 const breadSelectElement = document.querySelector('.breed-select');
 const catInfoElement = document.querySelector('.cat-info');
 const loaderElement = document.querySelector('.loader');
-const errorElement = document.querySelector('.error');
 
 breadSelectElement.hidden = true;
-errorElement.hidden = true;
+
 fetchBreeds()
   .then(ans => breedsList(ans))
+  .then(() => {
+    breadSelectElement.hidden = false;
+  })
   .catch(error => {
-    console.log(error);
-    errorElement.hidden = false;
+    Report.failure(
+      'Oops! Something went wrong! Try reloading the page!',
+      '',
+      'OK'
+    );
+    breadSelectElement.hidden = true;
   })
   .finally(() => {
     loaderElement.hidden = true;
-    breadSelectElement.hidden = false;
   });
 
 breadSelectElement.addEventListener('change', handlerClick);
@@ -31,12 +37,16 @@ function breedsList(ans) {
 }
 function handlerClick(evt) {
   loaderElement.hidden = false;
-  errorElement.hidden = true;
+
+  catInfoElement.innerHTML = '';
   fetchCatByBreed(evt.target.value)
     .then(info => catInfoMarkup(info))
     .catch(error => {
-      errorElement.hidden = false;
-      console.log(error);
+      Report.failure(
+        'Oops! Something went wrong! Try reloading the page!',
+        '',
+        'OK'
+      );
     })
     .finally(() => {
       loaderElement.hidden = true;
